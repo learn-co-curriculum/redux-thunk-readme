@@ -128,7 +128,7 @@ export function fetchCats() {
 
 Our __then()__ function will run *when the promise that __fetch()__ returns is *resolved*, allowing us to access the response data and parse it into JSON.  This doesn't solve our problem though because the __fetchCats()__ function will still return before the promise is resolved.  
 
-There's another problem. Because the retrieving data takes time, and because we always want our __Redux__ application to reflect the current application state, we want to represent the state of the application in between the user asking for data, and the application receiving the data. It's almost like each time a user asks for data we want to dispatch two actions to update our state: one to place our state as loading, and another to update the state with the data.  
+There's another problem. Because retrieving data takes time, and because we always want our __Redux__ application to reflect the current application state, we want to represent the state of the application in between the user asking for data, and the application receiving the data. It's almost like each time a user asks for data we want to dispatch two actions to update our state: one to place our state as loading, and another to update the state with the data.  
 
 So these are the steps we want to happen when the user wishes to call the API:
 1. Invoke __fetchCats()__
