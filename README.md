@@ -100,7 +100,7 @@ So if you look at the code above, you can a sense for what we are trying to do. 
 
 While this might seem like it should work, in reality we have a big problem.
 
-Web requests in JavaScript are *asynchronous*. That means if we make a web request at the first line of our fetchCats function:
+Web requests in JavaScript are *asynchronous*. That means if we make a web request at the first line of our __fetchCats()__ function:
 
 ```js
 export function fetchCats() {
