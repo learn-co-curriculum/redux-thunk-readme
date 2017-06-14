@@ -96,7 +96,7 @@ function catsReducer(state = [], action) {
 };
 ```
 
-So if you look at the code above, you can a sense for what we are trying to do. When a user clicks on the button, we call the __handleOnClick()__ function. This calls our action creator, the __fetchCats()__ function. The action creator then hits the API, and returns an action with our data, which then updates the state through the reducer.
+So if you look at the code above, you can get a sense for what we are trying to do. When a user clicks on the button, we call the __handleOnClick()__ function. This calls our action creator, the __fetchCats()__ function. The action creator then hits the API, and returns an action with our data, which then updates the state through the reducer.
 
 While this might seem like it should work, in reality we have a big problem.
 
