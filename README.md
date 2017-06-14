@@ -134,7 +134,7 @@ So these are the steps we want to happen when the user wishes to call the API:
 1. Invoke __fetchCats()__
 2. Directly after invoking __fetchCats()__ we dispatch an action that we are loading data.
 3. Then we call the __fetch()__ method, which runs, and returns a promise that we are waiting to resolve.
-4. When the promise is resolved, we dispatch another action with a `type` and `pets` which is sent to the reducer.
+4. When the promise is resolved, we dispatch another action with a `type` and `cats` which is sent to the reducer.
 
 Great. So how do we do all of this?
 
