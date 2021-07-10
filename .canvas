@@ -1,0 +1,6 @@
+---
+:lessons:
+- :id: 12496
+  :course_id: 358
+  :canvas_url: https://learning.flatironschool.com/courses/358/pages/asynchronous-web-requests-with-using-thunk-and-redux
+  :type: page
