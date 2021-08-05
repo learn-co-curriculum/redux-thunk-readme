@@ -2,11 +2,11 @@
 
 ## Objectives
 
-* Learn how to use action creator functions to make asynchronous web requests
+- Learn how to use action creator functions to make asynchronous web requests
   for data in `Redux`
-* Understand why we need special middleware in order to make some action creator
+- Understand why we need special middleware in order to make some action creator
   functions able to make asynchronous web requests.
-* Learn how to use the __Redux Thunk__ middleware to make some actions
+- Learn how to use the **Redux Thunk** middleware to make some actions
   asynchronous
 
 ## Introduction
@@ -49,18 +49,18 @@ make changes to the state, and components re-render with new data.
 Going back to hard-coded examples, in previous lessons, we populated our store
 using data inside an action creator function. Something like this:
 
-```js
+```jsx
 function fetchAstronauts() {
   const astronauts = [
-    {name: "Neil Armstrong", craft: "Apollo 11"},
-    {name: "Buzz Aldrin", craft: "Apollo 11"},
-    {name: "Michael Collins", craft: "Apollo 11"}
+    { name: "Neil Armstrong", craft: "Apollo 11" },
+    { name: "Buzz Aldrin", craft: "Apollo 11" },
+    { name: "Michael Collins", craft: "Apollo 11" },
   ];
   return {
-    type: 'ADD_ASTRONAUTS',
-    astronauts
+    type: "ADD_ASTRONAUTS",
+    astronauts,
   };
-};
+}
 ```
 
 What happens though, when we're ready to pull in real live data from an external
@@ -69,69 +69,69 @@ source like an API?
 Well, we already know how to make a web request. We can use something like
 JavaScript's native Fetch API to send a web request:
 
-```js
-fetch('http://api.open-notify.org/astros.json')
+```jsx
+fetch("http://api.open-notify.org/astros.json");
 ```
 
 So, can we simply make a `fetch` request inside our action creator function
 instead of hard-coding our data? The code below is a good attempt, but it
 ultimately ends in failure and disappointment:
 
-```js
+```jsx
 // ./src/App.js
 
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { fetchAstronauts } from '../actions/fetchAstronauts'
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { fetchAstronauts } from "../actions/fetchAstronauts";
 
 class App extends Component {
-
   handleOnClick() {
-    this.props.fetchAstronauts()
+    this.props.fetchAstronauts();
   }
 
   render() {
-    const astronauts = this.props.astronauts.map(astro => <li key={astro.id}>{astro.name}</li>);
+    const astronauts = this.props.astronauts.map((astro) => (
+      <li key={astro.id}>{astro.name}</li>
+    ));
 
-    return(
+    return (
       <div>
         <button onClick={(event) => this.handleOnClick(event)} />
         {astronauts}
       </div>
     );
   }
-};
-
-function mapDispatchToProps(dispatch){
-  return { fetchAstronauts: () => dispatch(fetchAstronauts()) }
 }
 
-function mapStateToProps(state){
-  return { astronauts: state.astronauts }
+function mapDispatchToProps(dispatch) {
+  return { fetchAstronauts: () => dispatch(fetchAstronauts()) };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+function mapStateToProps(state) {
+  return { astronauts: state.astronauts };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
 
 // ./src/actions/fetchAstronauts.js
 export function fetchAstronauts() {
-  const astronauts = fetch('http://api.open-notify.org/astros.json');
+  const astronauts = fetch("http://api.open-notify.org/astros.json");
   return {
-    type: 'ADD_ASTRONAUTS',
-    astronauts
+    type: "ADD_ASTRONAUTS",
+    astronauts,
   };
-};
+}
 
 // ./src/astronautsReducer.js
 function astronautsReducer(state = { astronauts: [] }, action) {
   switch (action.type) {
-
-    case 'ADD_ASTRONAUTS':
-      return { ...state, astronauts: action.astronauts }
+    case "ADD_ASTRONAUTS":
+      return { ...state, astronauts: action.astronauts };
 
     default:
       return state;
   }
-};
+}
 ```
 
 So if you look at the code above, you get a sense for what we are trying to do.
@@ -142,40 +142,41 @@ through the reducer.
 
 While this might seem like it should work, in reality we have a big problem.
 
-Fetch requests in JavaScript are *asynchronous*. That means if we make a fetch
+Fetch requests in JavaScript are _asynchronous_. That means if we make a fetch
 request at the first line of our `fetchAstronauts()` function:
 
-```js
+```jsx
 export function fetchAstronauts() {
-  const astronauts = fetch('http://api.open-notify.org/astros.json');
+  const astronauts = fetch("http://api.open-notify.org/astros.json");
   return {
-    type: 'ADD_ASTRONAUTS',
-    astronauts
+    type: "ADD_ASTRONAUTS",
+    astronauts,
   };
-};
+}
 ```
 
-The code on the second line will start running *before the web request resolves
-and we have a response that we can work with*.
+The code on the second line will start running _before the web request resolves
+and we have a response that we can work with_.
 
 A `fetch()` request returns something called a **Promise**. A Promise object is
 an object that represents some value that will be available later. We can access
 the data when the promise "resolves" and becomes available by chaining a
 `then()` function onto our `fetch()` call.
 
-```js
+```jsx
 export function fetchAstronauts() {
-  const astronauts = fetch('http://api.open-notify.org/astros.json')
-                      .then(response => response.json())
+  const astronauts = fetch("http://api.open-notify.org/astros.json").then(
+    (response) => response.json()
+  );
   return {
-    type: 'ADD_ASTRONAUTS',
-    astronauts
+    type: "ADD_ASTRONAUTS",
+    astronauts,
   };
 }
 ```
 
 Our `then()` function will run when the Promise that `fetch()` returns is
-*resolved*, allowing us to access the response data and parse it into JSON. This
+_resolved_, allowing us to access the response data and parse it into JSON. This
 doesn't solve our problem though because the `fetchAstronauts()` function will still
 return before the Promise is resolved.
 
@@ -209,7 +210,7 @@ this case, will allow us to slightly alter the behavior of our actions, allowing
 us to add in asynchronous requests. In this case, for middleware, we'll be using
 Thunk.
 
-To use __Redux Thunk__ you would need to install the NPM package:
+To use **Redux Thunk** you would need to install the NPM package:
 
 ```sh
 npm install --save redux-thunk
@@ -218,23 +219,24 @@ npm install --save redux-thunk
 Then, when you initialize the store in your `index.js` file, you can incorporate
 your middleware like this:
 
-```js
+```jsx
 // src/index.js
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
-import thunk from 'redux-thunk';
-import rootReducer from './reducers';
+import React from "react";
+import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware } from "redux";
+import thunk from "redux-thunk";
+import rootReducer from "./reducers";
 
 const store = createStore(rootReducer, applyMiddleware(thunk));
 
 ReactDOM.render(
-  <Provider store={store} >
+  <Provider store={store}>
     <App />
-  </Provider>, document.getElementById('container')
-)
+  </Provider>,
+  document.getElementById("container")
+);
 ```
 
 Notice that we imported in a new function `applyMiddleware()` from
@@ -247,22 +249,22 @@ In the above code, we tell our store to use the Thunk middleware. This
 middleware will do a couple of interesting things:
 
 1. Thunk allows us to return a function inside of our action creator. Normally, our action
-creator returns a plain JavaScript object, so returning a function is a pretty
-big change. 
+   creator returns a plain JavaScript object, so returning a function is a pretty
+   big change.
 
 2. That function receives the store's dispatch function as its argument. With that, we can dispatch multiple actions
-from inside that returned function.
+   from inside that returned function.
 
 Let's see the code and then we'll walk through it.
 
-```js
+```jsx
 // actions/fetchAstronauts.js
 export function fetchAstronauts() {
   return (dispatch) => {
-    dispatch({ type: 'START_ADDING_ASTRONAUTS_REQUEST' });
-    fetch('http://api.open-notify.org/astros.json')
-      .then(response => response.json())
-      .then(astronauts => dispatch({ type: 'ADD_ASTRONAUTS', astronauts }));
+    dispatch({ type: "START_ADDING_ASTRONAUTS_REQUEST" });
+    fetch("http://api.open-notify.org/astros.json")
+      .then((response) => response.json())
+      .then((astronauts) => dispatch({ type: "ADD_ASTRONAUTS", astronauts }));
   };
 }
 ```
@@ -281,23 +283,24 @@ Let's review the whole application now with Redux and Thunk configured. First we
 have `index.js`, which now imports `thunk` and `applyMiddleware` and
 uses them when creating the Redux store:
 
-```js
+```jsx
 // ./src/index.js
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
-import thunk from 'redux-thunk';
-import rootReducer from './reducers';
+import React from "react";
+import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware } from "redux";
+import thunk from "redux-thunk";
+import rootReducer from "./reducers";
 
 const store = createStore(rootReducer, applyMiddleware(thunk));
 
 ReactDOM.render(
-  <Provider store={store} >
+  <Provider store={store}>
     <App />
-  </Provider>, document.getElementById('container')
-)
+  </Provider>,
+  document.getElementById("container")
+);
 ```
 
 The `App.js` component we showed earlier can remain the same &mdash; note that
@@ -306,54 +309,55 @@ code is in the component. The component's main purpose is to render JSX. It uses
 data from Redux via `mapStateToProps()` and connects an `onClick` event to an
 action through `mapDispatchToProps()`:
 
-```js
+```jsx
 // ./src/App.js
 
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { fetchAstronauts } from '../actions/fetchAstronauts'
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { fetchAstronauts } from "../actions/fetchAstronauts";
 
 class App extends Component {
-
   handleOnClick() {
-    this.props.fetchAstronauts()
+    this.props.fetchAstronauts();
   }
 
   render() {
-    const astronauts = this.props.astronauts.map(astro => <li key={astro.id}>{astro.name}</li>);
+    const astronauts = this.props.astronauts.map((astro) => (
+      <li key={astro.id}>{astro.name}</li>
+    ));
 
-    return(
+    return (
       <div>
         <button onClick={(event) => this.handleOnClick(event)} />
         {astronauts}
       </div>
     );
   }
-};
-
-function mapDispatchToProps(dispatch){
-  return { fetchAstronauts: () => dispatch(fetchAstronauts()) }
 }
 
-function mapStateToProps(state){
-  return {astronauts: state.astronauts}
+function mapDispatchToProps(dispatch) {
+  return { fetchAstronauts: () => dispatch(fetchAstronauts()) };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+function mapStateToProps(state) {
+  return { astronauts: state.astronauts };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
 ```
 
 What happens when the `onClick` event is fired? All of that logic
 is taken care of outside of the component, in our `fetchAstronauts()`
 action:
 
-```js
+```jsx
 // actions/fetchAstronauts.js
 export function fetchAstronauts() {
   return (dispatch) => {
-    dispatch({ type: 'START_ADDING_ASTRONAUTS_REQUEST' });
-    fetch('http://api.open-notify.org/astros.json')
-      .then(response => response.json())
-      .then(astronauts => dispatch({ type: 'ADD_ASTRONAUTS', astronauts }));
+    dispatch({ type: "START_ADDING_ASTRONAUTS_REQUEST" });
+    fetch("http://api.open-notify.org/astros.json")
+      .then((response) => response.json())
+      .then((astronauts) => dispatch({ type: "ADD_ASTRONAUTS", astronauts }));
   };
 }
 ```
@@ -371,29 +375,31 @@ We can update our reducer to include both `type`s and to also change a bit of
 state to indicate if data is in the process of being fetched. We'll modify the
 initial state to do this:
 
-```js
+```jsx
 // ./src/astronautsReducer.js
-function astronautsReducer(state = { astronauts: [], requesting: false }, action) {
+function astronautsReducer(
+  state = { astronauts: [], requesting: false },
+  action
+) {
   switch (action.type) {
-
-    case 'START_ADDING_ASTRONAUTS_REQUEST':
+    case "START_ADDING_ASTRONAUTS_REQUEST":
       return {
         ...state,
         astronauts: [...state.astronauts],
-        requesting: true
-      }
+        requesting: true,
+      };
 
-    case 'ADD_ASTRONAUTS':
+    case "ADD_ASTRONAUTS":
       return {
         ...state,
         astronauts: action.astronauts,
-        requesting: false
-      }
+        requesting: false,
+      };
 
     default:
       return state;
   }
-};
+}
 ```
 
 Now, we have a way to indicate in our app when data is being loaded! If
@@ -408,5 +414,3 @@ our action creator instead of a plain JavaScript object. That returned function
 receives the store's dispatch function, and with that we are able to dispatch
 multiple actions: one to place the state in a loading state, and another to
 update our store with the returned data.
-
-<p class='util--hide'>View <a href='https://learn.co/lessons/redux-thunk-readme'>Redux Thunk Readme</a> on Learn.co and start learning to code for free.</p>
